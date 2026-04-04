@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Max World Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(135deg, #00c853, #b2ff59);
+    }
+
+    /* Remove link underline */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* HEADER */
+    header {
+      background: black;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .header-content img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .header-content span {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    /* CONTAINER */
+    .container {
+      padding: 20px;
+    }
+
+    /* CARD */
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    /* BUTTON */
+    .btn {
+      display: block;
+      width: 80%;
+      max-width: 200px;
+      margin: 10px auto;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #006400;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #004d00;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-content">
+      <img src="logo.png">
+      <span>Max World Hub</span>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="container">
+
+    <div class="card">
+      <h2>📱 Apps Section</h2>
+      <p>Download your favorite apps below</p>
+
+      <!-- Example app -->
+      <a href="apps/GPT.apk" download>
+        <button class="btn">Download GPT App</button>
+      </a>
+
+      <a href="apps/music.apk" download>
+        <button class="btn">Download Music App</button>
+      </a>
+
+    </div>
+
+  </div>
+
+</body>
+
+</html>
