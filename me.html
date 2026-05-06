@@ -51,7 +51,9 @@
             align-items: center;
             gap: 10px;
             margin-top: 20px;
+            transition: 0.3s;
         }
+        .google-btn:hover { background: #eee; }
 
         /* --- 1. TOP PROFILE CONTAINER (Glass) --- */
         .profile-card {
@@ -113,7 +115,7 @@
 
         .hero-card {
             position: relative;
-            width: 180px; height: 260px; /* Bada Vertical */
+            width: 180px; height: 260px;
             border-radius: 15px;
             background: #111;
             overflow: hidden;
@@ -142,7 +144,7 @@
         }
 
         .v-card {
-            min-width: 120px; height: 180px; /* Chota Vertical */
+            min-width: 120px; height: 180px;
             background: #111; border-radius: 10px;
             overflow: hidden; position: relative;
             border: 1px solid #222;
@@ -171,7 +173,7 @@
 <body>
 
     <div id="login-screen">
-        <h1 style="color:var(--main-red)">MW HUB</h1>
+        <h1 style="color:var(--main-red); letter-spacing: 2px;">MW HUB</h1>
         <p>Login to sync your watch history</p>
         <button class="google-btn" onclick="login()">
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20">
@@ -210,19 +212,19 @@
                 </div>
         </div>
 
-        <a href="https://t.me/your_link" class="support-btn">SUPPORT MW HUB</a>
+        <a href="https://t.me/MWHUB_OFFICIAL" class="support-btn">SUPPORT MW HUB</a>
     </div>
 
     <script>
-        // --- FIREBASE SETUP ---
+        // --- FIREBASE SETUP USING YOUR KEYS ---
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DB_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyAE_oP6wv4A1UxfEdcT82f4KZkhSBzfH3M",
+            authDomain: "mw-hub-59e96.firebaseapp.com",
+            databaseURL: "https://mw-hub-59e96-default-rtdb.firebaseio.com",
+            projectId: "mw-hub-59e96",
+            storageBucket: "mw-hub-59e96.firebasestorage.app",
+            messagingSenderId: "1084767566489",
+            appId: "1:1084767566489:web:5913fcac03c2947c9b1608"
         };
         firebase.initializeApp(firebaseConfig);
 
@@ -230,13 +232,15 @@
         const db = firebase.database();
         const storage = firebase.storage();
 
-        // Login Function
+        // Login Function (Direct Redirect for mobile compatibility)
         function login() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
+            auth.signInWithPopup(provider).catch(err => {
+                alert("Login Error: " + err.message);
+            });
         }
 
-        // Image Upload
+        // Image Upload to Storage
         function uploadImg(input) {
             const file = input.files[0];
             const user = auth.currentUser;
@@ -247,30 +251,30 @@
                         document.getElementById('pfp').src = url;
                         db.ref(`users/${user.uid}/profileUrl`).set(url);
                     });
-                });
+                }).catch(err => alert("Upload error: " + err.message));
             }
         }
 
-        // Name Save
+        // Name Save to DB
         function saveName(val) {
             const user = auth.currentUser;
             if (user) db.ref(`users/${user.uid}/displayName`).set(val);
         }
 
-        // Auth Listener
+        // Auth Logic & Data Loader
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
                 
-                // Load User Info
+                // Load Profile Info
                 db.ref(`users/${user.uid}`).on('value', snap => {
                     const data = snap.val();
                     if (data?.profileUrl) document.getElementById('pfp').src = data.profileUrl;
                     if (data?.displayName) document.getElementById('userName').value = data.displayName;
                 });
 
-                // Load History
+                // Load History & Resume Card
                 db.ref(`users/${user.uid}/watchHistory`).orderByChild('timestamp').on('value', snap => {
                     const list = document.getElementById('historyList');
                     list.innerHTML = "";
@@ -278,7 +282,7 @@
                     
                     snap.forEach(child => {
                         const val = child.val();
-                        items.unshift(val);
+                        items.unshift(val); // Latest First
                         const prog = (val.episode / val.totalEp) * 100;
                         list.innerHTML += `
                             <div class="v-card" onclick="location.href='${val.link}?resumeEp=${val.episode}'">
@@ -303,5 +307,4 @@
         function resumeAction() { if(window.resumeLink) location.href = window.resumeLink; }
     </script>
 </body>
-    </html>
-    
+</html>
