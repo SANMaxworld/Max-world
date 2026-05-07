@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Watch Solo Leveling Season 1 Hindi Dubbed Online - Max World Hub</title>
+    <meta name="description" content="Stream Solo Leveling Season 1 in Hindi Dubbed on Max World Hub. Watch every episode of Sung Jinwoo's evolution in 1080p high quality. Fast Voe.sx player with easy download options.">
+    
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* DESIGN IS LOCKED - DO NOT MODIFY CSS */
+        .rec-card { position: relative; width: 100%; aspect-ratio: 2/3; border-radius: 8px; overflow: hidden; cursor: pointer; background: #1a1a1a; transition: transform 0.2s; display: block; text-decoration: none; }
+        .rec-card:hover { transform: scale(1.03); }
+        .rec-poster { width: 100%; height: 100%; object-fit: cover; }
+        .lang-tag { position: absolute; top: 5px; right: 5px; background: #ff0000; color: white; font-size: 9px; padding: 2px 5px; border-radius: 3px; font-weight: bold; z-index: 2; }
+        .rec-title { position: absolute; bottom: 0; width: 100%; padding: 15px 5px 5px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); color: white; font-size: 11px; text-align: center; }
+        .seo-about-section { margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .seo-about-section h2 { font-size: 16px; color: #fff; margin-bottom: 10px; border-left: 3px solid #ff0000; padding-left: 10px; }
+        .seo-about-section p { font-size: 12px; color: #aaa; line-height: 1.6; text-align: justify; margin: 0; }
+        .player-wrapper { position: relative; background: #000; overflow: hidden; width: 100%; }
+        .iframe-container { width: 100%; height: 100%; display: none; aspect-ratio: 16/9; }
+        .custom-select { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .custom-select select { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .dropdown-icon { font-size: 9px; margin-left: 6px; color: #888; }
+        .support-link { display: block; text-align: center; font-size: 11px; color: #666; text-decoration: none; margin-top: 10px; transition: 0.3s; }
+        .support-link:hover { color: #ff0000; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="watch-container">
+        <div class="player-wrapper" id="videoArea">
+            <img src="../assets/solo_leveling_poster.jpg" class="poster-img" id="mainPoster" alt="Solo Leveling Poster" style="width: 100%; display: block;">
+            <div class="iframe-container" id="iframeContainer">
+                <iframe id="mainPlayer" src="" 
+                    allowfullscreen 
+                    allowtransparency 
+                    allow="autoplay; encrypted-media; picture-in-picture" 
+                    scrolling="no" 
+                    frameborder="0" 
+                    style="width:100%; height:100%; border:none;">
+                </iframe>
+            </div>
+        </div>
+        <div class="watch-content">
+            <div class="title-row">
+                <h1>Solo Leveling Season 1 [Hindi Dubbed]</h1>
+                <a href="#" class="info-link">Info</a>
+            </div>
+            <div class="meta-stats">
+                <span class="rating">⭐ 8.7</span> <span class="divider">|</span>
+                <span>2024</span> <span class="divider">|</span>
+                <span>Japan/Korea</span> <span class="divider">|</span>
+                <span>Action, Fantasy, Adventure</span>
+            </div>
+            <div class="action-scroll">
+                <button class="action-btn">📂 Added</button>
+                <button class="action-btn" onclick="sharePage()">🔗 Share</button>
+                <button class="action-btn" onclick="window.location.href='DOWNLOAD_LINK_HERE'">⬇️ Download</button>
+            </div>
+            <div class="resources-row">
+                <h2 class="resources-title">Resources</h2>
+                <span class="uploader-text">Uploaded by Max World Hub</span>
+            </div>
+            <div class="dropdown-row">
+                <div class="custom-select">Hindi Dubbed</div>
+                <div class="custom-select">Season 01 <span class="dropdown-icon">▼</span><select onchange="location = this.value;">
+                    <option value="#" selected>Season 01</option>
+                    <option value="LINK_TO_S2">Season 02 (Arise)</option>
+                </select></div>
+            </div>
+            
+            <div class="episode-slider" id="epSlider">
+                <div class="ep-box" onclick="playEpisode('orh2fx68yjke', this)">1</div>
+                <div class="ep-box" onclick="playEpisode('wcpv885tqjmw', this)">2</div>
+                <div class="ep-box" onclick="playEpisode('vaonxiurjssy', this)">3</div>
+                <div class="ep-box" onclick="playEpisode('qjmvbdy3bfwr', this)">4</div>
+                <div class="ep-box" onclick="playEpisode('gtzzkgiyfynk', this)">5</div>
+                <div class="ep-box" onclick="playEpisode('x8jep2acvrb3', this)">6</div>
+                <div class="ep-box" onclick="playEpisode('3dwgtqvakhen', this)">7</div>
+                <div class="ep-box" onclick="playEpisode('mw9xpxlz7vhi', this)">8</div>
+                <div class="ep-box" onclick="playEpisode('u0jawgfr7lgm', this)">9</div>
+                <div class="ep-box" onclick="playEpisode('osjheazfabuq', this)">10</div> 
+                <div class="ep-box" onclick="playEpisode('zvqkaaryn3xf', this)">11</div>
+                <div class="ep-box" onclick="playEpisode('stsar6yeujuu', this)">12</div>
+            </div>
+
+            <div class="tabs-container"><div class="tab active">Recommended</div><div class="tab">Similar Anime</div></div>
+            <div class="rec-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+                <a href="#" class="rec-card">
+                    <div class="lang-tag">Hindi</div>
+                    <img src="../assets/jujutsu_poster.jpeg" class="rec-poster">
+                    <div class="rec-title">Jujutsu Kaisen</div>
+                </a>
+                <a href="#" class="rec-card">
+                    <div class="lang-tag">Hindi</div>
+                    <img src="../assets/demon_slayer_poster.jpeg" class="rec-poster">
+                    <div class="rec-title">Demon Slayer</div>
+                </a>
+                <a href="#" class="rec-card">
+                    <div class="lang-tag">Hindi</div>
+                    <img src="../assets/chainsaw_man.jpeg" class="rec-poster">
+                    <div class="rec-title">Chainsaw Man</div>
+                </a>
+            </div>
+            <div class="seo-about-section">
+                <h2>About Solo Leveling Hindi Dubbed</h2>
+                <p>Welcome to <strong>Max World Hub</strong>, your #1 source to watch <strong>Solo Leveling Hindi Dubbed</strong>.</p>
+            </div>
+            <a href="../index.html" class="back-home-btn">← Back to Homepage</a>
+            <a href="https://t.me/+pnQEnRYbIDtiYzFl" class="support-link">Report Issue / Request Help?</a>
+            <div class="copyright-footer"><p>© 2026 Max World Hub | Powered by SAN Team</p></div>
+        </div>
+    </div> 
+    <a href="DOWNLOAD_LINK_HERE" target="_blank" class="floating-dl-btn">Download</a>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE_oP6wv4A1UxfEdcT82f4KZkhSBzfH3M",
+            authDomain: "mw-hub-59e96.firebaseapp.com",
+            projectId: "mw-hub-59e96",
+            storageBucket: "mw-hub-59e96.firebasestorage.app",
+            messagingSenderId: "1084767566489",
+            appId: "1:1084767566489:web:5913fcac03c2947c9b1608"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- Data Config for this Anime ---
+        const ANIME_ID = "solo-leveling-s1";
+        const ANIME_TITLE = "Solo Leveling Season 1";
+        const ANIME_POSTER = "../assets/solo_leveling_poster.jpg";
+
+        window.playEpisode = async function(voeId, element) {
+            const player = document.getElementById('mainPlayer');
+            const container = document.getElementById('iframeContainer');
+            const poster = document.getElementById('mainPoster');
+            
+            poster.style.display = 'none';
+            container.style.display = 'block';
+            
+            player.src = "about:blank"; 
+            setTimeout(() => { player.src = "https://voe.sx/e/" + voeId; }, 150);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            let boxes = document.getElementsByClassName('ep-box');
+            for(let i=0; i<boxes.length; i++){ boxes[i].classList.remove('active'); }
+            if(element) element.classList.add('active');
+
+            // --- Save Progress to Cloud ---
+            const user = auth.currentUser;
+            if (user && element) {
+                const epNum = parseInt(element.innerText);
+                const totalEp = boxes.length;
+                
+                await setDoc(doc(db, "users", user.uid), {
+                    watchHistory: {
+                        [ANIME_ID]: {
+                            id: ANIME_ID,
+                            title: ANIME_TITLE,
+                            lastEp: epNum,
+                            totalEp: totalEp,
+                            poster: ANIME_POSTER,
+                            progress: Math.round((epNum / totalEp) * 100),
+                            timestamp: Date.now()
+                        }
+                    }
+                }, { merge: true });
+            }
+        };
+
+        // --- Auto-Resume Function ---
+        onAuthStateChanged(auth, async (user) => {
+            const boxes = document.getElementsByClassName('ep-box');
+            let epToPlay = 1; // Default Ep 1
+            let voeToPlay = 'orh2fx68yjke'; // Default Voe ID
+
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if (docSnap.exists()) {
+                    const history = docSnap.data().watchHistory || {};
+                    if (history[ANIME_ID]) {
+                        epToPlay = history[ANIME_ID].lastEp;
+                        // Find the matching box to get its onclick data
+                        const targetBox = Array.from(boxes).find(b => parseInt(b.innerText) === epToPlay);
+                        if (targetBox) {
+                            // Extract Voe ID from the onclick attribute
+                            const onclickStr = targetBox.getAttribute('onclick');
+                            voeToPlay = onclickStr.split("'")[1];
+                        }
+                    }
+                }
+            }
+
+            // Execute Play
+            const finalBox = Array.from(boxes).find(b => parseInt(b.innerText) === epToPlay) || boxes[0];
+            playEpisode(voeToPlay, finalBox);
+        });
+
+        window.sharePage = () => {
+            if (navigator.share) { navigator.share({ title: document.querySelector('h1').innerText, url: window.location.href }); }
+            else { navigator.clipboard.writeText(window.location.href); alert('URL Copied!'); }
+        }
+    </script>
+</body>
+</html>
