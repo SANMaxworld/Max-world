@@ -60,7 +60,8 @@
         .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
         .user-details { margin-left: 15px; }
-        #userName { margin: 0; font-size: 1.2rem; outline: none; }
+        #userName { margin: 0; font-size: 1.2rem; outline: none; border-bottom: 1px solid transparent; }
+        #userName:focus { border-bottom: 1px solid var(--neon-red); }
 
         .status-light-box {
             margin: 10px 20px; display: flex; align-items: center; gap: 8px;
@@ -96,14 +97,16 @@
         .vertical-card {
             flex: 0 0 110px; background: rgba(255,255,255,0.05);
             border-radius: 12px; overflow: hidden; position: relative;
+            transition: transform 0.3s;
         }
+        .vertical-card:active { transform: scale(0.95); }
 
         .vertical-card img { width: 100%; height: 150px; object-fit: cover; }
 
         .progress-line-container { width: 100%; height: 4px; background: #333; }
         .progress-line-fill { height: 100%; background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
 
-        .card-info { padding: 5px; text-align: center; font-size: 0.65rem; }
+        .card-info { padding: 5px; text-align: center; font-size: 0.65rem; color: #ccc; }
 
         /* --- SUPPORT & FOOTER --- */
         .support-btn {
@@ -116,6 +119,7 @@
 
         footer {
             text-align: center; padding: 20px; color: #555; font-size: 0.7rem;
+            margin-top: 20px;
         }
 
         #fileInput { display: none; }
@@ -125,8 +129,8 @@
 
     <div id="loginOverlay">
         <div class="login-box">
-            <h2 style="color: var(--neon-red); margin: 0;">MW HUB</h2>
-            <p style="color: #888; font-size: 0.8rem;">Login to save your progress</p>
+            <h2 style="color: var(--neon-red); margin: 0; letter-spacing: 2px;">MW HUB</h2>
+            <p style="color: #888; font-size: 0.8rem; margin-top: 10px;">Login to save your progress</p>
             <button class="google-btn" onclick="login()">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="18">
                 Google Login
@@ -142,7 +146,7 @@
             <input type="file" id="fileInput" accept="image/*">
             <div class="user-details">
                 <h2 id="userName" contenteditable="true" onblur="saveProfile()">Guest User</h2>
-                <p style="font-size: 0.6rem; color: #555; margin: 0;">Tap to edit name</p>
+                <p style="font-size: 0.6rem; color: #555; margin: 0; margin-top: 5px;">Tap name to edit</p>
             </div>
         </div>
 
@@ -154,7 +158,7 @@
         <div class="history-card-box">
             <div class="history-title">WATCH HISTORY</div>
             <div id="historyGrid" class="history-scroll">
-                <p id="emptyMsg" style="font-size: 0.8rem; color: #444;">No history found...</p>
+                <p id="emptyMsg" style="font-size: 0.8rem; color: #444; padding: 10px;">No history found...</p>
             </div>
         </div>
 
@@ -165,10 +169,16 @@
         </footer>
     </div>
 
+    <div style="position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #222; z-index: 999;">
+        <div style="text-align: center; color: #666;" onclick="location.href='../index.html'">Explore</div>
+        <div style="text-align: center; color: #666;" onclick="location.href='../index.html'">Home</div>
+        <div style="text-align: center; color: var(--neon-red); font-weight: bold;">Me</div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAE_oP6wv4A1UxfEdcT82f4KZkhSBzfH3M",
@@ -189,55 +199,70 @@
 
         // Login Logic
         window.login = () => {
-            signInWithPopup(auth, provider).catch(err => alert(err.message));
+            signInWithPopup(auth, provider).catch(err => alert("Login Failed: " + err.message));
         };
 
+        // Auth State Observer
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loginOverlay.style.display = 'none';
                 mainUI.style.display = 'block';
+                
+                // Prioritize LocalStorage for custom edits, else use Google data
                 document.getElementById('userName').innerText = localStorage.getItem('mw_name') || user.displayName;
                 document.getElementById('userImg').src = localStorage.getItem('mw_img') || user.photoURL;
+                
                 loadHistory(user.uid);
+            } else {
+                loginOverlay.style.display = 'flex';
+                mainUI.style.display = 'none';
             }
         });
 
-        // Save Custom Name/Photo
+        // Save Custom Profile locally
         window.saveProfile = () => {
             localStorage.setItem('mw_name', document.getElementById('userName').innerText);
         };
 
+        // Profile Image Upload
         document.getElementById('fileInput').onchange = (e) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                document.getElementById('userImg').src = reader.result;
-                localStorage.setItem('mw_img', reader.result);
-            };
-            reader.readAsDataURL(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    document.getElementById('userImg').src = reader.result;
+                    localStorage.setItem('mw_img', reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
         };
 
-        // Load History
+        // Load History from Firestore
         async function loadHistory(uid) {
-            const docSnap = await getDoc(doc(db, "users", uid));
-            if (docSnap.exists()) {
-                const history = docSnap.data().watchHistory || {};
-                const grid = document.getElementById('historyGrid');
-                const entries = Object.values(history);
-                if(entries.length > 0) {
-                    document.getElementById('emptyMsg').style.display = 'none';
-                    grid.innerHTML = entries.map(item => `
-                        <div class="vertical-card" onclick="location.href='anime/${item.id}.html'">
-                            <img src="${item.poster}">
-                            <div class="progress-line-container">
-                                <div class="progress-line-fill" style="width: ${item.progress}%"></div>
+            try {
+                const docSnap = await getDoc(doc(db, "users", uid));
+                if (docSnap.exists()) {
+                    const history = docSnap.data().watchHistory || {};
+                    const grid = document.getElementById('historyGrid');
+                    const entries = Object.values(history).sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    if(entries.length > 0) {
+                        document.getElementById('emptyMsg').style.display = 'none';
+                        grid.innerHTML = entries.map(item => `
+                            <div class="vertical-card" onclick="location.href='anime/${item.id}.html?lastEp=${item.lastEp}'">
+                                <img src="${item.poster}" onerror="this.src='https://via.placeholder.com/110x150?text=No+Image'">
+                                <div class="progress-line-container">
+                                    <div class="progress-line-fill" style="width: ${item.progress}%"></div>
+                                </div>
+                                <div class="card-info">EPISODE ${item.lastEp}</div>
                             </div>
-                            <div class="card-info">EPISODE ${item.lastEp}</div>
-                        </div>
-                    `).join('');
+                        `).join('');
+                    }
                 }
+            } catch (error) {
+                console.error("Error loading history:", error);
             }
         }
     </script>
 </body>
 </html>
-
