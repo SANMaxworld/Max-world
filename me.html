@@ -1,310 +1,157 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MW Hub - My Profile</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-
+    <title>My Profile | MW Hub</title>
+    <link rel="stylesheet" href="index-style.css">
     <style>
-        :root {
-            --main-red: #ff0000;
-            --neon-glow: 0 0 15px rgba(255, 0, 0, 0.8);
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
+        :root { --neon-red: #ff0000; --glass: rgba(255, 255, 255, 0.07); }
+        body { background: #000; color: #fff; padding-bottom: 80px; font-family: sans-serif; }
+
+        /* Login Screen */
+        #loginScreen {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 9999; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .login-btn {
+            background: #fff; color: #000; border: none; padding: 12px 25px;
+            border-radius: 30px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px;
         }
 
-        body {
-            background: #050505;
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 15px;
-        }
-
-        /* --- LOGIN OVERLAY --- */
-        #login-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .google-btn {
-            background: white;
-            color: black;
-            padding: 12px 24px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-        .google-btn:hover { background: #eee; }
-
-        /* --- 1. TOP PROFILE CONTAINER (Glass) --- */
+        /* Profile Glass Card */
         .profile-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px; padding: 25px; margin: 20px;
+            display: flex; align-items: center; gap: 20px;
         }
-
-        .user-meta {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 10px;
+        .avatar-container {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 2px solid var(--neon-red); overflow: hidden; position: relative;
         }
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        .profile-frame {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--main-red);
-            box-shadow: var(--neon-glow);
-            overflow: hidden;
-            cursor: pointer;
-        }
+        /* History Section */
+        .history-box { background: var(--glass); border-radius: 25px; margin: 20px; padding: 20px; }
+        .history-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; }
+        .history-scroll::-webkit-scrollbar { height: 4px; }
+        .history-scroll::-webkit-scrollbar-thumb { background: var(--neon-red); border-radius: 10px; }
 
-        .profile-frame img { width: 100%; height: 100%; object-fit: cover; }
-
-        .name-input {
-            background: transparent; border: none;
-            border-bottom: 1px solid var(--main-red);
-            color: white; font-size: 18px; font-weight: bold;
-            outline: none; width: 60%;
-        }
-
-        .status-box {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 13px; color: #00ff88; font-weight: bold;
-        }
-
-        .led-blink {
-            width: 10px; height: 10px; background: #00ff88;
-            border-radius: 50%; box-shadow: 0 0 10px #00ff88;
-            animation: blinker 1.5s infinite;
-        }
-
-        /* --- 2. RESUME CONTAINER (Bada Card) --- */
-        .resume-wrapper {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .section-label { font-size: 16px; margin-bottom: 15px; display: block; border-left: 4px solid var(--main-red); padding-left: 10px; }
-
-        .hero-card {
-            position: relative;
-            width: 180px; height: 260px;
-            border-radius: 15px;
-            background: #111;
-            overflow: hidden;
-            cursor: pointer;
-            border: 1px solid var(--glass-border);
-        }
-
-        .hero-card img { width: 100%; height: 100%; object-fit: cover; }
-
-        .resume-btn-style {
-            width: 100%; padding: 10px;
-            background: var(--main-red); color: white;
-            font-weight: bold; position: absolute; bottom: 0; text-align: center;
-        }
-
-        /* --- 3. WATCH HISTORY CONTAINER (Glass) --- */
-        .history-container {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-        }
-
-        .history-scroll {
-            display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px;
-        }
-
-        .v-card {
-            min-width: 120px; height: 180px;
-            background: #111; border-radius: 10px;
-            overflow: hidden; position: relative;
-            border: 1px solid #222;
-        }
-
-        .v-card img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Progress Line (Red) */
-        .progress-line {
-            position: absolute; bottom: 0; left: 0;
-            height: 4px; background: var(--main-red);
-            box-shadow: var(--neon-glow);
-        }
+        .mini-card { flex: 0 0 110px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.05); }
+        .mini-card img { width: 100%; height: 150px; object-fit: cover; }
+        .progress-box { width: 100%; height: 4px; background: #333; }
+        .progress-line { height: 100%; background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
 
         .support-btn {
-            display: block; width: 100%; padding: 15px;
-            margin-top: 20px; background: var(--main-red);
-            color: white; text-align: center; border-radius: 10px;
-            text-decoration: none; font-weight: bold;
+            background: linear-gradient(45deg, #ff0000, #b30000);
+            border: none; color: #fff; padding: 15px; width: calc(100% - 40px);
+            margin: 20px; border-radius: 15px; font-weight: bold; cursor: pointer;
         }
-
-        @keyframes blinker { 50% { opacity: 0.3; } }
-        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <h1 style="color:var(--main-red); letter-spacing: 2px;">MW HUB</h1>
-        <p>Login to sync your watch history</p>
-        <button class="google-btn" onclick="login()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20">
-            Login with Google
+    <div id="loginScreen">
+        <h1 style="color: var(--neon-red);">MAX WORLD HUB</h1>
+        <p style="color: #666; margin-bottom: 20px;">Login to sync your history</p>
+        <button class="login-btn" onclick="loginWithGoogle()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="20">
+            Sign in with Google
         </button>
     </div>
 
-    <div id="dashboard" style="display:none">
-        
+    <div id="mainContent" style="display: none;">
         <div class="profile-card">
+            <div class="avatar-container">
+                <img id="userAvatar" src="assets/default-avatar.png">
+            </div>
             <div class="user-meta">
-                <div class="profile-frame" onclick="document.getElementById('imgUpload').click()">
-                    <img id="pfp" src="https://via.placeholder.com/150">
-                    <input type="file" id="imgUpload" style="display:none" onchange="uploadImg(this)">
-                </div>
-                <input type="text" id="userName" class="name-input" placeholder="Enter Name..." onchange="saveName(this.value)">
-            </div>
-            <div class="status-box">
-                <div class="led-blink"></div>
-                <span>Google account connected</span>
+                <h2 id="userName">Loading...</h2>
+                <button onclick="logout()" style="background:none; border:none; color:red; font-size:0.7rem; cursor:pointer;">Logout</button>
             </div>
         </div>
 
-        <div class="resume-wrapper">
-            <span class="section-label">Resume Last Seen</span>
-            <div class="hero-card" onclick="resumeAction()">
-                <img id="heroImg" src="https://via.placeholder.com/180x260?text=No+History">
-                <div class="progress-line" id="heroProgress" style="width: 0%;"></div>
-                <div class="resume-btn-style">RESUME</div>
+        <div class="history-box">
+            <h3 style="margin:0 0 15px 0; color:var(--neon-red); font-size: 1rem;">CONTINUE WATCHING</h3>
+            <div id="historyGrid" class="history-scroll">
+                <p id="noHistory" style="font-size: 0.8rem; color:#555;">No watch history found.</p>
             </div>
         </div>
 
-        <div class="history-container">
-            <span class="section-label">Watch History</span>
-            <div class="history-scroll" id="historyList">
-                </div>
-        </div>
-
-        <a href="https://t.me/MWHUB_OFFICIAL" class="support-btn">SUPPORT MW HUB</a>
+        <button class="support-btn">SUPPORT MW HUB</button>
     </div>
 
-    <script>
-        // --- FIREBASE SETUP USING YOUR KEYS ---
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">🧭</span><span>Explore</span></div>
+        <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
+        <div class="nav-item active"><span class="nav-icon">👤</span><span>Me</span></div>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyAE_oP6wv4A1UxfEdcT82f4KZkhSBzfH3M",
             authDomain: "mw-hub-59e96.firebaseapp.com",
-            databaseURL: "https://mw-hub-59e96-default-rtdb.firebaseio.com",
             projectId: "mw-hub-59e96",
             storageBucket: "mw-hub-59e96.firebasestorage.app",
             messagingSenderId: "1084767566489",
             appId: "1:1084767566489:web:5913fcac03c2947c9b1608"
         };
-        firebase.initializeApp(firebaseConfig);
 
-        const auth = firebase.auth();
-        const db = firebase.database();
-        const storage = firebase.storage();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-        // Login Function (Direct Redirect for mobile compatibility)
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => {
-                alert("Login Error: " + err.message);
-            });
-        }
-
-        // Image Upload to Storage
-        function uploadImg(input) {
-            const file = input.files[0];
-            const user = auth.currentUser;
-            if (user && file) {
-                const ref = storage.ref(`users/${user.uid}/pfp.jpg`);
-                ref.put(file).then(() => {
-                    ref.getDownloadURL().then(url => {
-                        document.getElementById('pfp').src = url;
-                        db.ref(`users/${user.uid}/profileUrl`).set(url);
-                    });
-                }).catch(err => alert("Upload error: " + err.message));
-            }
-        }
-
-        // Name Save to DB
-        function saveName(val) {
-            const user = auth.currentUser;
-            if (user) db.ref(`users/${user.uid}/displayName`).set(val);
-        }
-
-        // Auth Logic & Data Loader
-        auth.onAuthStateChanged(user => {
+        // Check User Session
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                
-                // Load Profile Info
-                db.ref(`users/${user.uid}`).on('value', snap => {
-                    const data = snap.val();
-                    if (data?.profileUrl) document.getElementById('pfp').src = data.profileUrl;
-                    if (data?.displayName) document.getElementById('userName').value = data.displayName;
-                });
-
-                // Load History & Resume Card
-                db.ref(`users/${user.uid}/watchHistory`).orderByChild('timestamp').on('value', snap => {
-                    const list = document.getElementById('historyList');
-                    list.innerHTML = "";
-                    let items = [];
-                    
-                    snap.forEach(child => {
-                        const val = child.val();
-                        items.unshift(val); // Latest First
-                        const prog = (val.episode / val.totalEp) * 100;
-                        list.innerHTML += `
-                            <div class="v-card" onclick="location.href='${val.link}?resumeEp=${val.episode}'">
-                                <img src="${val.image}">
-                                <div class="progress-line" style="width:${prog}%"></div>
-                            </div>`;
-                    });
-
-                    if (items.length > 0) {
-                        const last = items[0];
-                        document.getElementById('heroImg').src = last.image;
-                        document.getElementById('heroProgress').style.width = (last.episode / last.totalEp * 100) + "%";
-                        window.resumeLink = `${last.link}?resumeEp=${last.episode}`;
-                    }
-                });
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('userName').innerText = user.displayName;
+                document.getElementById('userAvatar').src = user.photoURL;
+                fetchHistory(user.uid);
             } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainContent').style.display = 'none';
             }
         });
 
-        function resumeAction() { if(window.resumeLink) location.href = window.resumeLink; }
+        // Google Login
+        window.loginWithGoogle = () => {
+            signInWithPopup(auth, provider).catch(err => console.log(err));
+        };
+
+        // Logout
+        window.logout = () => signOut(auth);
+
+        // Fetch History from Firestore
+        async function fetchHistory(uid) {
+            const docRef = doc(db, "users", uid);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const historyData = docSnap.data().watchHistory || {};
+                const grid = document.getElementById('historyGrid');
+                const entries = Object.values(historyData);
+                
+                if(entries.length > 0) {
+                    document.getElementById('noHistory').style.display = 'none';
+                    grid.innerHTML = entries.map(anime => `
+                        <div class="mini-card" onclick="location.href='anime/${anime.id}.html?lastEp=${anime.lastEp}'">
+                            <img src="${anime.poster}">
+                            <div class="progress-box"><div class="progress-line" style="width: ${anime.progress}%"></div></div>
+                            <p style="font-size:0.6rem; padding:4px; margin:0; text-align:center;">Ep ${anime.lastEp}</p>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
     </script>
 </body>
 </html>
