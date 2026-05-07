@@ -4,95 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | MW Hub</title>
-    <link rel="stylesheet" href="index-style.css">
     <style>
-        :root { --neon-red: #ff0000; --glass: rgba(255, 255, 255, 0.07); }
-        body { background: #000; color: #fff; padding-bottom: 80px; font-family: sans-serif; }
-
-        /* Login Screen */
-        #loginScreen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: #000; z-index: 9999; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
+        :root {
+            --neon-red: #ff0000;
+            --neon-green: #39ff14;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
         }
-        .login-btn {
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding-bottom: 100px; /* Space for bottom nav */
+        }
+
+        /* --- LOGIN INTERFACE --- */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .login-box {
+            background: var(--glass);
+            padding: 40px; border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            text-align: center; backdrop-filter: blur(20px);
+        }
+
+        .google-btn {
             background: #fff; color: #000; border: none; padding: 12px 25px;
-            border-radius: 30px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            border-radius: 30px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; margin-top: 20px;
         }
 
-        /* Profile Glass Card */
-        .profile-card {
-            background: var(--glass); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px; padding: 25px; margin: 20px;
-            display: flex; align-items: center; gap: 20px;
+        /* --- PROFILE SECTION --- */
+        .profile-container {
+            margin: 30px 20px 10px 20px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 20px;
+            display: flex; align-items: center;
         }
-        .avatar-container {
-            width: 80px; height: 80px; border-radius: 50%;
-            border: 2px solid var(--neon-red); overflow: hidden; position: relative;
+
+        .avatar-wrapper {
+            width: 75px; height: 75px; border-radius: 50%;
+            border: 2px solid var(--neon-red); overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3); cursor: pointer;
         }
-        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* History Section */
-        .history-box { background: var(--glass); border-radius: 25px; margin: 20px; padding: 20px; }
-        .history-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; }
-        .history-scroll::-webkit-scrollbar { height: 4px; }
-        .history-scroll::-webkit-scrollbar-thumb { background: var(--neon-red); border-radius: 10px; }
+        .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-        .mini-card { flex: 0 0 110px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.05); }
-        .mini-card img { width: 100%; height: 150px; object-fit: cover; }
-        .progress-box { width: 100%; height: 4px; background: #333; }
-        .progress-line { height: 100%; background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
+        .user-details { margin-left: 15px; }
+        #userName { margin: 0; font-size: 1.2rem; outline: none; }
 
+        .status-light-box {
+            margin: 10px 20px; display: flex; align-items: center; gap: 8px;
+            background: rgba(57, 255, 20, 0.05); padding: 8px 15px;
+            border-radius: 15px; border: 1px solid rgba(57, 255, 20, 0.2);
+        }
+
+        .light-dot {
+            width: 8px; height: 8px; background: var(--neon-green);
+            border-radius: 50%; box-shadow: 0 0 10px var(--neon-green);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .status-text { font-size: 0.75rem; color: var(--neon-green); }
+
+        /* --- HISTORY SECTION --- */
+        .history-card-box {
+            background: var(--glass);
+            margin: 20px; padding: 15px;
+            border-radius: 25px; border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+        }
+
+        .history-title { color: var(--neon-red); font-size: 1rem; margin-bottom: 15px; font-weight: bold; }
+
+        .history-scroll {
+            display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px;
+        }
+        .history-scroll::-webkit-scrollbar { display: none; }
+
+        .vertical-card {
+            flex: 0 0 110px; background: rgba(255,255,255,0.05);
+            border-radius: 12px; overflow: hidden; position: relative;
+        }
+
+        .vertical-card img { width: 100%; height: 150px; object-fit: cover; }
+
+        .progress-line-container { width: 100%; height: 4px; background: #333; }
+        .progress-line-fill { height: 100%; background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
+
+        .card-info { padding: 5px; text-align: center; font-size: 0.65rem; }
+
+        /* --- SUPPORT & FOOTER --- */
         .support-btn {
             background: linear-gradient(45deg, #ff0000, #b30000);
-            border: none; color: #fff; padding: 15px; width: calc(100% - 40px);
-            margin: 20px; border-radius: 15px; font-weight: bold; cursor: pointer;
+            border: none; color: #fff; padding: 15px;
+            width: calc(100% - 40px); margin: 20px;
+            border-radius: 15px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.2);
         }
+
+        footer {
+            text-align: center; padding: 20px; color: #555; font-size: 0.7rem;
+        }
+
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="loginScreen">
-        <h1 style="color: var(--neon-red);">MAX WORLD HUB</h1>
-        <p style="color: #666; margin-bottom: 20px;">Login to sync your history</p>
-        <button class="login-btn" onclick="loginWithGoogle()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="20">
-            Sign in with Google
-        </button>
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2 style="color: var(--neon-red); margin: 0;">MW HUB</h2>
+            <p style="color: #888; font-size: 0.8rem;">Login to save your progress</p>
+            <button class="google-btn" onclick="login()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="18">
+                Google Login
+            </button>
+        </div>
     </div>
 
-    <div id="mainContent" style="display: none;">
-        <div class="profile-card">
-            <div class="avatar-container">
-                <img id="userAvatar" src="assets/default-avatar.png">
-            </div>
-            <div class="user-meta">
-                <h2 id="userName">Loading...</h2>
-                <button onclick="logout()" style="background:none; border:none; color:red; font-size:0.7rem; cursor:pointer;">Logout</button>
+    <div id="mainUI" style="display: none;">
+        <div class="profile-container">
+            <label for="fileInput" class="avatar-wrapper">
+                <img id="userImg" src="https://via.placeholder.com/150" alt="Profile">
+            </label>
+            <input type="file" id="fileInput" accept="image/*">
+            <div class="user-details">
+                <h2 id="userName" contenteditable="true" onblur="saveProfile()">Guest User</h2>
+                <p style="font-size: 0.6rem; color: #555; margin: 0;">Tap to edit name</p>
             </div>
         </div>
 
-        <div class="history-box">
-            <h3 style="margin:0 0 15px 0; color:var(--neon-red); font-size: 1rem;">CONTINUE WATCHING</h3>
+        <div class="status-light-box">
+            <div class="light-dot"></div>
+            <span class="status-text">Your Google account is connected</span>
+        </div>
+
+        <div class="history-card-box">
+            <div class="history-title">WATCH HISTORY</div>
             <div id="historyGrid" class="history-scroll">
-                <p id="noHistory" style="font-size: 0.8rem; color:#555;">No watch history found.</p>
+                <p id="emptyMsg" style="font-size: 0.8rem; color: #444;">No history found...</p>
             </div>
         </div>
 
-        <button class="support-btn">SUPPORT MW HUB</button>
-    </div>
+        <button class="support-btn" onclick="alert('Support system coming soon!')">SUPPORT MW HUB</button>
 
-    <nav class="bottom-nav">
-        <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">🧭</span><span>Explore</span></div>
-        <div class="nav-item" onclick="location.href='index.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
-        <div class="nav-item active"><span class="nav-icon">👤</span><span>Me</span></div>
-    </nav>
+        <footer>
+            <p>© 2026 Max World Hub (MW Hub)<br>All Rights Reserved.</p>
+        </footer>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAE_oP6wv4A1UxfEdcT82f4KZkhSBzfH3M",
@@ -108,45 +184,54 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // Check User Session
+        const loginOverlay = document.getElementById('loginOverlay');
+        const mainUI = document.getElementById('mainUI');
+
+        // Login Logic
+        window.login = () => {
+            signInWithPopup(auth, provider).catch(err => alert(err.message));
+        };
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                document.getElementById('userName').innerText = user.displayName;
-                document.getElementById('userAvatar').src = user.photoURL;
-                fetchHistory(user.uid);
-            } else {
-                document.getElementById('loginScreen').style.display = 'flex';
-                document.getElementById('mainContent').style.display = 'none';
+                loginOverlay.style.display = 'none';
+                mainUI.style.display = 'block';
+                document.getElementById('userName').innerText = localStorage.getItem('mw_name') || user.displayName;
+                document.getElementById('userImg').src = localStorage.getItem('mw_img') || user.photoURL;
+                loadHistory(user.uid);
             }
         });
 
-        // Google Login
-        window.loginWithGoogle = () => {
-            signInWithPopup(auth, provider).catch(err => console.log(err));
+        // Save Custom Name/Photo
+        window.saveProfile = () => {
+            localStorage.setItem('mw_name', document.getElementById('userName').innerText);
         };
 
-        // Logout
-        window.logout = () => signOut(auth);
+        document.getElementById('fileInput').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById('userImg').src = reader.result;
+                localStorage.setItem('mw_img', reader.result);
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
 
-        // Fetch History from Firestore
-        async function fetchHistory(uid) {
-            const docRef = doc(db, "users", uid);
-            const docSnap = await getDoc(docRef);
-            
+        // Load History
+        async function loadHistory(uid) {
+            const docSnap = await getDoc(doc(db, "users", uid));
             if (docSnap.exists()) {
-                const historyData = docSnap.data().watchHistory || {};
+                const history = docSnap.data().watchHistory || {};
                 const grid = document.getElementById('historyGrid');
-                const entries = Object.values(historyData);
-                
+                const entries = Object.values(history);
                 if(entries.length > 0) {
-                    document.getElementById('noHistory').style.display = 'none';
-                    grid.innerHTML = entries.map(anime => `
-                        <div class="mini-card" onclick="location.href='anime/${anime.id}.html?lastEp=${anime.lastEp}'">
-                            <img src="${anime.poster}">
-                            <div class="progress-box"><div class="progress-line" style="width: ${anime.progress}%"></div></div>
-                            <p style="font-size:0.6rem; padding:4px; margin:0; text-align:center;">Ep ${anime.lastEp}</p>
+                    document.getElementById('emptyMsg').style.display = 'none';
+                    grid.innerHTML = entries.map(item => `
+                        <div class="vertical-card" onclick="location.href='anime/${item.id}.html'">
+                            <img src="${item.poster}">
+                            <div class="progress-line-container">
+                                <div class="progress-line-fill" style="width: ${item.progress}%"></div>
+                            </div>
+                            <div class="card-info">EPISODE ${item.lastEp}</div>
                         </div>
                     `).join('');
                 }
@@ -155,3 +240,4 @@
     </script>
 </body>
 </html>
+
