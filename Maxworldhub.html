@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max World Hub - Seamless Preload Player</title>
+    <style>
+        /* CSS: वेबसाइट का प्रोफेशनल डार्क लेआउट */
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+
+        /* प्लेयर का कंटेनर जिससे साइज फिक्स रहे और झटके न लगें */
+        .player-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9; /* परफेक्ट वीडियो रेशियो */
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* दोनों वीडियो टैग्स की बेसिक सेटिंग्स */
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* वीडियो कटेगा नहीं */
+            background-color: #000;
+        }
+
+        /* जो वीडियो चल रहा है उसकी सेटिंग्स */
+        .active-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 1;
+            z-index: 2;
+        }
+
+        /* जो वीडियो बैकग्राउंड में प्रीलोड हो रहा है (छुपा हुआ) */
+        .hidden-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none; /* यूजर इससे छेड़छाड़ नहीं कर सकता */
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #222;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffaa00;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Max World Hub</h2>
+    
+    <div class="player-container">
+        <video id="part1" class="active-video" controls playsinline>
+            <source src="https://files.catbox.moe/mzmdr8.mp4" type="video/mp4">
+        </video>
+
+        <video id="part2" class="hidden-video" controls playsinline preload="auto">
+            <source src="https://files.catbox.moe/lz21c6.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="status" class="status-bar">Now Playing: Part 1</div>
+
+    <script>
+        const video1 = document.getElementById('part1');
+        const video2 = document.getElementById('part2');
+        const statusText = document.getElementById('status');
+
+        // जब Part 1 खत्म हो जाए, तब यह फंक्शन चलेगा
+        video1.addEventListener('ended', () => {
+            
+            // 1. पार्ट 1 को छुपाएं
+            video1.classList.remove('active-video');
+            video1.classList.add('hidden-video');
+            
+            // 2. पार्ट 2 को सामने लाएं
+            video2.classList.remove('hidden-video');
+            video2.classList.add('active-video');
+            
+            // 3. पार्ट 2 को तुरंत प्ले करें
+            let playPromise = video2.play();
+            
+            // ब्राउज़र पॉलिसी चेक (ताकि कोई प्लेबैक एरर न आए)
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    statusText.innerText = "Now Playing: Part 2";
+                    statusText.style.color = "#00ffcc";
+                }).catch(error => {
+                    // अगर ब्राउज़र ऑटोप्ले रोकता है, तो यूजर को प्ले बटन दबाने को कहें
+                    statusText.innerText = "Autoplay blocked by browser. Please click Play on Part 2.";
+                    statusText.style.color = "#ff3333";
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
