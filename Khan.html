@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max World Hub - Pro Player</title>
+    <style>
+        /* === BASE SETTINGS === */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
+        body { background-color: #000; color: #fff; height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+        /* === PLAYER CONTAINER === */
+        .video-container {
+            position: relative; width: 100%; max-width: 1000px; aspect-ratio: 16 / 9;
+            background: #000; overflow: hidden; display: flex;
+        }
+        .video-container:fullscreen { max-width: 100%; width: 100vw; height: 100vh; }
+        
+        video { width: 100%; height: 100%; object-fit: contain; }
+
+        /* === UI OVERLAY === */
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-between;
+            transition: opacity 0.3s ease; z-index: 10;
+        }
+        .ui-layer.hidden { opacity: 0; pointer-events: none; }
+
+        /* --- TOP BAR --- */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
+        .top-left { display: flex; align-items: center; gap: 15px; font-size: 16px; font-weight: 500; }
+        .top-right { display: flex; align-items: center; gap: 20px; font-size: 10px; text-align: center; color: #ccc;}
+        .icon-btn { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        svg { fill: #fff; width: 24px; height: 24px; }
+
+        /* --- CENTER CONTROLS --- */
+        .center-controls {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; gap: 50px;
+        }
+        .skip-btn, .play-center-btn { background: none; border: none; cursor: pointer; opacity: 0.9; transition: transform 0.2s; }
+        .skip-btn:active, .play-center-btn:active { transform: scale(0.9); }
+        .skip-btn svg { width: 40px; height: 40px; }
+        .play-center-btn svg { width: 60px; height: 60px; }
+
+        /* --- LOCK BUTTON (LEFT) --- */
+        .lock-container {
+            position: absolute; left: 30px; top: 50%; transform: translateY(-50%);
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            background: rgba(0,0,0,0.4); padding: 8px 15px; border-radius: 25px;
+            font-size: 14px; opacity: 0.8; transition: opacity 0.3s; z-index: 20;
+        }
+        .lock-container:hover { opacity: 1; }
+        .lock-container svg { width: 20px; height: 20px; }
+        
+        /* Locked State */
+        .video-container.locked .ui-layer { opacity: 0; pointer-events: none; }
+        .video-container.locked .lock-container { opacity: 1; pointer-events: all; }
+        .video-container.locked .lock-text { display: none; } /* Hide text when locked */
+
+        /* --- BOTTOM BAR --- */
+        .bottom-bar {
+            display: flex; align-items: center; padding: 15px 20px; gap: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
+        .play-small-btn { background: none; border: none; cursor: pointer; }
+        .play-small-btn svg { width: 20px; height: 20px; }
+        
+        .time-text { font-size: 12px; color: #ddd; white-space: nowrap; font-variant-numeric: tabular-nums;}
+        
+        .progress-wrapper { flex-grow: 1; height: 20px; display: flex; align-items: center; cursor: pointer; }
+        .progress-bg { width: 100%; height: 3px; background: rgba(255,255,255,0.3); position: relative; border-radius: 2px;}
+        .progress-filled { height: 100%; background: #00e6a8; width: 0%; border-radius: 2px; position: absolute; top:0; left:0;}
+        .progress-dot { 
+            position: absolute; right: -6px; top: -4.5px; width: 12px; height: 12px; 
+            background: #fff; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .bottom-tools { display: flex; align-items: center; gap: 20px; font-size: 13px; color: #ddd;}
+        .tool-btn { display: flex; align-items: center; gap: 5px; cursor: pointer; transition: color 0.2s; }
+        .tool-btn:hover { color: #fff; }
+        .tool-btn svg { width: 18px; height: 18px; }
+        .active-text { color: #00e6a8; font-weight: bold; }
+
+        /* === RIGHT SIDE MENUS (Speed, Quality, Language) === */
+        .side-menu {
+            position: absolute; top: 0; right: -300px; width: 300px; height: 100%;
+            background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(5px);
+            transition: right 0.3s ease; z-index: 30; padding: 20px;
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .side-menu.open { right: 0; }
+        
+        .menu-overlay-bg {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: transparent; z-index: 25; display: none;
+        }
+        .menu-overlay-bg.active { display: block; }
+
+        .menu-item {
+            padding: 15px 0; font-size: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .menu-item.active { color: #00e6a8; }
+        .menu-item svg { width: 16px; height: 16px; fill: #00e6a8; display: none; }
+        .menu-item.active svg { display: block; }
+
+        /* Custom Language Menu UI */
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .lang-col { display: flex; flex-direction: column; }
+        .lang-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #fff; text-align: center;}
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 14px;}
+        .toggle-switch { width: 40px; height: 20px; background: #00e6a8; border-radius: 10px; position: relative; cursor: pointer;}
+        .toggle-switch::after { content: ''; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; }
+        .toggle-switch.off { background: #555; }
+        .toggle-switch.off::after { right: auto; left: 2px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="video-container" id="videoContainer">
+        
+        <!-- VIDEO ELEMENT (Advance Autoplay System Included) -->
+        <video id="mainVideo" playsinline>
+            <source src="https://files.catbox.moe/mzmdr8.mp4" type="video/mp4">
+        </video>
+
+        <!-- BACKGROUND CLICK CATCHER FOR MENUS -->
+        <div class="menu-overlay-bg" id="menuOverlayBg"></div>
+
+        <!-- LOCK BUTTON -->
+        <div class="lock-container" id="lockBtn">
+            <svg id="lockIconOpen" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>
+            <svg id="lockIconClosed" style="display:none;" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+            <span class="lock-text" id="lockText">Tap to Lock</span>
+        </div>
+
+        <!-- MAIN UI LAYER -->
+        <div class="ui-layer" id="uiLayer">
+            
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-left">
+                    <svg style="cursor:pointer;" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                    Mushoku Tensei: Jobless Reincarnation [Hindi] S02 E24
+                </div>
+                <div class="top-right">
+                    <div class="icon-btn">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                        Help
+                    </div>
+                    <div class="icon-btn">
+                        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                        Setting
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Controls -->
+            <div class="center-controls">
+                <!-- Rewind 10s -->
+                <button class="skip-btn" id="rewindBtn">
+                    <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8zm-1.1 11H9.5v-3.32l-1.32.41v-.84l1.37-.47h1.34V16zm4.18-1.57c0 .63-.22 1.11-.65 1.45-.43.34-1.02.51-1.78.51-.76 0-1.34-.17-1.77-.51-.42-.34-.64-.82-.64-1.45v-1.85c0-.63.22-1.12.65-1.46.43-.34 1.02-.51 1.77-.51.75 0 1.34.17 1.77.51.43.34.65.83.65 1.46v1.85zm-1.17-1.92c0-.36-.08-.63-.23-.8-.16-.17-.41-.25-.75-.25-.33 0-.58.08-.74.25-.16.17-.24.44-.24.8v2.01c0 .36.08.63.24.8.16.17.41.25.74.25.34 0 .59-.08.75-.25.15-.17.23-.44.23-.8v-2.01z"/></svg>
+                </button>
+                
+                <!-- Play/Pause Big -->
+                <button class="play-center-btn" id="playCenterBtn">
+                    <svg id="playIconBig" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIconBig" style="display:none;" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+
+                <!-- Forward 10s -->
+                <button class="skip-btn" id="forwardBtn">
+                    <svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8zm1.09 11h-1.41v-3.32l-1.32.41v-.84l1.37-.47h1.36V16zm4.18-1.57c0 .63-.22 1.11-.65 1.45-.43.34-1.02.51-1.78.51-.76 0-1.34-.17-1.77-.51-.42-.34-.64-.82-.64-1.45v-1.85c0-.63.22-1.12.65-1.46.43-.34 1.02-.51 1.77-.51.75 0 1.34.17 1.77.51.43.34.65.83.65 1.46v1.85zm-1.17-1.92c0-.36-.08-.63-.23-.8-.16-.17-.41-.25-.75-.25-.33 0-.58.08-.74.25-.16.17-.24.44-.24.8v2.01c0 .36.08.63.24.8.16.17.41.25.74.25.34 0 .59-.08.75-.25.15-.17.23-.44.23-.8v-2.01z"/></svg>
+                </button>
+            </div>
+            <!-- Bottom Bar -->
+            <div class="bottom-bar">
+                <button class="play-small-btn" id="playSmallBtn">
+                    <svg id="playIconSmall" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIconSmall" style="display:none;" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+
+                <span class="time-text" id="currentTimeTxt">00:00</span>
+                
+                <div class="progress-wrapper" id="progressWrapper">
+                    <div class="progress-bg">
+                        <div class="progress-filled" id="progressBar">
+                            <div class="progress-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <span class="time-text" id="durationTxt">00:00</span>
+
+                <div class="bottom-tools">
+                    <div class="tool-btn" id="fitBtn">
+                        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                        Fit
+                    </div>
+                    <div class="tool-btn" id="langMenuBtn">
+                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+                        Language
+                    </div>
+                    <div class="tool-btn" id="speedMenuBtn">
+                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        <span id="speedTxt">1x</span>
+                    </div>
+                    <div class="tool-btn active-text" id="qualityMenuBtn">
+                        720P
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU: SPEED -->
+        <div class="side-menu" id="speedMenu">
+            <div style="text-align:center; font-weight:bold; margin-bottom: 20px;">Speed</div>
+            <div class="menu-item" data-speed="0.5">0.5x <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="menu-item" data-speed="0.75">0.75x <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="menu-item active" data-speed="1">1x <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="menu-item" data-speed="1.25">1.25x <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="menu-item" data-speed="1.5">1.5x <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="menu-item" data-speed="2">2x <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+        </div>
+
+        <!-- MENU: QUALITY -->
+        <div class="side-menu" id="qualityMenu">
+            <div style="text-align:center; font-weight:bold; margin-bottom: 20px;">Quality</div>
+            <div class="menu-item">480P <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="menu-item active">720P <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+        </div>
+
+        <!-- MENU: LANGUAGE (Matched exactly from Image 2841) -->
+        <div class="side-menu" id="langMenu" style="width: 350px;">
+            <div class="lang-grid">
+                <!-- Audio Column -->
+                <div class="lang-col">
+                    <div class="lang-title">Audio</div>
+                    <div class="toggle-row">Original Audio <div class="toggle-switch"></div></div>
+                    <div class="menu-item">English dub <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                    <div class="menu-item active">Hindi dub <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                    <div class="menu-item">esla dub <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                    <div class="menu-item">ptbr dub <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                </div>
+                <!-- Subtitle Column -->
+                <div class="lang-col">
+                    <div class="lang-title">Subtitle</div>
+                    <div class="toggle-row">Bilingual <div class="toggle-switch off"></div></div>
+                    <div class="menu-item">IN <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                    <div style="margin-top:20px; font-size:14px; text-align:right; color:#ccc; cursor:pointer;">Download &gt;</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- === JAVASCRIPT: LOGIC & ADVANCE SYSTEM === -->
+    <script>
+        const video = document.getElementById('mainVideo');
+        const container = document.getElementById('videoContainer');
+        const uiLayer = document.getElementById('uiLayer');
+        
+        // Buttons & Icons
+        const playCenterBtn = document.getElementById('playCenterBtn');
+        const playSmallBtn = document.getElementById('playSmallBtn');
+        const playIconBig = document.getElementById('playIconBig');
+        const pauseIconBig = document.getElementById('pauseIconBig');
+        const playIconSmall = document.getElementById('playIconSmall');
+        const pauseIconSmall = document.getElementById('pauseIconSmall');
+        const rewindBtn = document.getElementById('rewindBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const fitBtn = document.getElementById('fitBtn');
+        
+        // Lock System
+        const lockBtn = document.getElementById('lockBtn');
+        const lockIconOpen = document.getElementById('lockIconOpen');
+        const lockIconClosed = document.getElementById('lockIconClosed');
+        const lockText = document.getElementById('lockText');
+        let isLocked = false;
+
+        // Progress
+        const progressWrapper = document.getElementById('progressWrapper');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeTxt = document.getElementById('currentTimeTxt');
+        const durationTxt = document.getElementById('durationTxt');
+
+        // Menus
+        const menuOverlayBg = document.getElementById('menuOverlayBg');
+        const speedMenuBtn = document.getElementById('speedMenuBtn');
+        const qualityMenuBtn = document.getElementById('qualityMenuBtn');
+        const langMenuBtn = document.getElementById('langMenuBtn');
+        const speedMenu = document.getElementById('speedMenu');
+        const qualityMenu = document.getElementById('qualityMenu');
+        const langMenu = document.getElementById('langMenu');
+        const speedTxt = document.getElementById('speedTxt');
+
+        // --- 1. PLAY / PAUSE LOGIC ---
+        function togglePlay() {
+            if (video.paused) video.play();
+            else video.pause();
+        }
+        playCenterBtn.addEventListener('click', togglePlay);
+        playSmallBtn.addEventListener('click', togglePlay);
+
+        video.addEventListener('play', () => {
+            playIconBig.style.display = 'none'; pauseIconBig.style.display = 'block';
+            playIconSmall.style.display = 'none'; pauseIconSmall.style.display = 'block';
+        });
+        video.addEventListener('pause', () => {
+            playIconBig.style.display = 'block'; pauseIconBig.style.display = 'none';
+            playIconSmall.style.display = 'block'; pauseIconSmall.style.display = 'none';
+        });
+
+        // --- 2. TIME & PROGRESS LOGIC ---
+        function formatTime(sec) {
+            let m = Math.floor(sec / 60);
+            let s = Math.floor(sec % 60);
+            return (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+        }
+        
+        video.addEventListener('loadedmetadata', () => {
+            durationTxt.innerText = formatTime(video.duration);
+        });
+
+        video.addEventListener('timeupdate', () => {
+            if(video.duration){
+                currentTimeTxt.innerText = formatTime(video.currentTime);
+                progressBar.style.width = (video.currentTime / video.duration * 100) + '%';
+            }
+        });
+
+        progressWrapper.addEventListener('click', (e) => {
+            const rect = progressWrapper.getBoundingClientRect();
+            video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+        });
+
+        // --- 3. SKIP 10s LOGIC ---
+        rewindBtn.addEventListener('click', () => video.currentTime = Math.max(0, video.currentTime - 10));
+        forwardBtn.addEventListener('click', () => video.currentTime = Math.min(video.duration, video.currentTime + 10));
+
+        // --- 4. LOCK SYSTEM ---
+        lockBtn.addEventListener('click', () => {
+            isLocked = !isLocked;
+            if(isLocked) {
+                container.classList.add('locked');
+                lockIconOpen.style.display = 'none';
+                lockIconClosed.style.display = 'block';
+            } else {
+                container.classList.remove('locked');
+                lockIconOpen.style.display = 'block';
+                lockIconClosed.style.display = 'none';
+                resetHideTimer();
+            }
+        });
+
+        // --- 5. HIDE UI ON INACTIVITY ---
+        let hideTimeout;
+        function resetHideTimer() {
+            if (isLocked) return;
+            uiLayer.classList.remove('hidden');
+            lockBtn.style.opacity = '1';
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                if(!video.paused) {
+                    uiLayer.classList.add('hidden');
+                    lockBtn.style.opacity = '0';
+                }
+            }, 3000); // 3 seconds timeout
+        }
+        container.addEventListener('mousemove', resetHideTimer);
+        container.addEventListener('click', resetHideTimer);
+
+        // --- 6. FULLSCREEN (FIT) LOGIC ---
+        fitBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) container.requestFullscreen().catch(err=>{});
+            else document.exitFullscreen();
+        });
+
+        // --- 7. MENUS LOGIC ---
+        function closeAllMenus() {
+            speedMenu.classList.remove('open');
+            qualityMenu.classList.remove('open');
+            langMenu.classList.remove('open');
+            menuOverlayBg.classList.remove('active');
+        }
+
+        function openMenu(menu) {
+            closeAllMenus();
+            menu.classList.add('open');
+            menuOverlayBg.classList.add('active');
+        }
+
+        speedMenuBtn.addEventListener('click', () => openMenu(speedMenu));
+        qualityMenuBtn.addEventListener('click', () => openMenu(qualityMenu));
+        langMenuBtn.addEventListener('click', () => openMenu(langMenu));
+        menuOverlayBg.addEventListener('click', closeAllMenus);
+
+        // Speed Menu Selection
+        const speedItems = speedMenu.querySelectorAll('.menu-item');
+        speedItems.forEach(item => {
+            item.addEventListener('click', () => {
+                speedItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                let speed = item.getAttribute('data-speed');
+                video.playbackRate = parseFloat(speed);
+                speedTxt.innerText = speed + 'x';
+                closeAllMenus();
+            });
+        });
+
+        // Toggles in Lang Menu
+        const toggles = document.querySelectorAll('.toggle-switch');
+        toggles.forEach(t => {
+            t.addEventListener('click', () => t.classList.toggle('off'));
+        });
+
+
+        // --- 8. ADVANCE SYSTEM (Seamless Autoplay Next Part) ---
+        // (तुम्हारे पिछले लिंक्स के साथ इंटीग्रेटेड)
+        const parts = [
+            "https://files.catbox.moe/mzmdr8.mp4", // Part 1
+            "https://files.catbox.moe/lz21c6.mp4"  // Part 2
+        ];
+        let currentPartIndex = 0;
+
+        video.addEventListener('ended', () => {
+            currentPartIndex++;
+            if (currentPartIndex < parts.length) {
+                video.src = parts[currentPartIndex];
+                video.load();
+                video.play();
+            } else {
+                // Episode Ended
+                playIconBig.style.display = 'block'; pauseIconBig.style.display = 'none';
+                playIconSmall.style.display = 'block'; pauseIconSmall.style.display = 'none';
+                uiLayer.classList.remove('hidden');
+            }
+        });
+
+    </script>
+</body>
+</html>
